@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { loginService } from "@/services/auth-service";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function LoginForm({
   className,
@@ -98,6 +99,9 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
+      <Link href="/" className="text-center underline underline-offset-4 text-sm">
+        Back to home
+      </Link>
     </div>
   );
 }

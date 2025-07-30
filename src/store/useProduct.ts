@@ -1,9 +1,10 @@
-import { fetchProduct } from "@/services/product-service";
+import { fetchProduct, fetchProductBySlug } from "@/services/product-service";
 import { create } from "zustand";
 
 interface Product {
   id: number;
   title: string;
+  slug: string;
   price: number;
   description: string;
   category: {
@@ -22,6 +23,7 @@ interface ProductState {
   totalPages: number;
   limit: number;
   fetchProducts: (page?: number) => Promise<void>;
+  fetchProductBySlug: (slug: string) => Promise<void>;
   setPage: (page: number) => void;
 }
 
@@ -44,6 +46,18 @@ export const useProduct = create<ProductState>((set) => ({
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
       });
+    } catch (error) {
+      set({
+        error: "Failed to fetch",
+        loading: false,
+      });
+    }
+  },
+  fetchProductBySlug: async (slug: string) => {
+    try {
+      set({ loading: true });
+      const response = await fetchProductBySlug(slug);
+      set({ products: [response], loading: false });
     } catch (error) {
       set({
         error: "Failed to fetch",

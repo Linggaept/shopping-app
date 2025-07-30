@@ -2,13 +2,12 @@
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
-import { useProduct } from "@/store/useProduct"
+  PaginationPrevious
+} from "@/components/ui/pagination";
+import { useProduct } from "@/store/useProduct";
 
 export function PaginationComponent() {
   const { currentPage, totalPages, fetchProducts } = useProduct();
@@ -25,7 +24,7 @@ export function PaginationComponent() {
       pages = Array.from({ length: totalPages }, (_, i) => i);
     } else {
       let start = Math.max(0, currentPage - 2);
-      let end = Math.min(totalPages, start + 5);
+      const end = Math.min(totalPages, start + 5);
       
       if (end - start < 5) {
         start = Math.max(0, end - 5);

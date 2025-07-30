@@ -1,6 +1,7 @@
 "use client";
 
 import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import { useCategory } from "@/store/useCategories";
 
 import {
   Accordion,
@@ -28,6 +29,9 @@ import { RemoveToken } from "@/lib/token";
 import { useEffect, useState } from "react";
 import { GetProfile } from "./profile";
 import { ModeToggle } from "./themes";
+import { fetchCategoriesById } from "@/services/category-service";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface MenuItem {
   title: string;
@@ -35,6 +39,7 @@ interface MenuItem {
   description?: string;
   icon?: React.ReactNode;
   items?: MenuItem[];
+  onClick?: () => void; // Optional click handler for sub-menu items
 }
 
 interface Navbar1Props {
@@ -57,7 +62,7 @@ interface Navbar1Props {
     logout: {
       title: string;
       url: string;
-    }; 
+    };
   };
   token?: {
     name: string;
@@ -72,37 +77,11 @@ const Navbar1 = ({
     title: "Shadcnblocks.com",
   },
   menu = [
-    { title: "Home", url: "#" },
+    { title: "Home", url: "/" },
     {
       title: "Categories",
       url: "#",
-      items: [
-        {
-          title: "Blog",
-          description: "The latest industry news, updates, and info",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Company",
-          description: "Our mission is to innovate and empower the world",
-          icon: <Trees className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Careers",
-          description: "Browse job listing and discover our workspace",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Support",
-          description:
-            "Get in touch with our support team or visit our community forums",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "#",
-        },
-      ],
+      items: [],
     },
     {
       title: "Resources",
@@ -150,10 +129,40 @@ const Navbar1 = ({
   },
 }: Navbar1Props) => {
   const [token, setToken] = useState<string | null>(null);
+  const { categories, fetchCategories } = useCategory();
+  const router = useRouter();
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
-  }, []);
+    fetchCategories(); // Fetch categories when component mounts
+  }, [fetchCategories]);
+
+  const handleCategoryClick = async (id: number) => {
+  try {
+    // Use router for navigation after getting category data
+    await fetchCategoriesById(id);
+    router.push(`/categories/${id}`);
+  } catch (error) {
+    console.error("Error handling category click:", error);
+  }
+};
+
+  const menuWithCategories = menu.map((item) => {
+    if (item.title === "Categories") {
+      return {
+        ...item,
+        items: categories.map((category) => ({
+          title: category.name,
+          description: `Browse our ${category.name.toLowerCase()} collection`,
+          icon: <Book className="size-5 shrink-0" />,
+          url: `/categories/${category.id}`,
+          onClick: () => handleCategoryClick(category.id),
+        })),
+      };
+    }
+    return item;
+  });
 
   return (
     <section className="py-4 dark:bg-black bg-white">
@@ -163,7 +172,7 @@ const Navbar1 = ({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8" alt={logo.alt} />
+              <Image width={40} height={40} src={logo.src} className="max-h-8" alt={logo.alt} />
               <span className="text-lg font-semibold tracking-tighter">
                 {logo.title}
               </span>
@@ -171,7 +180,7 @@ const Navbar1 = ({
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
+                  {menuWithCategories.map((item) => renderMenuItem(item))}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
@@ -203,7 +212,7 @@ const Navbar1 = ({
           <div className="flex items-center justify-between">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8" alt={logo.alt} />
+              <Image width={40} height={40} src={logo.src} className="max-h-8" alt={logo.alt} />
             </a>
             <Sheet>
               <SheetTrigger asChild>
@@ -215,7 +224,7 @@ const Navbar1 = ({
                 <SheetHeader>
                   <SheetTitle>
                     <a href={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="max-h-8" alt={logo.alt} />
+                      <Image width={40} height={40} src={logo.src} className="max-h-8" alt={logo.alt} />
                     </a>
                   </SheetTitle>
                 </SheetHeader>
@@ -302,6 +311,12 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
     <a
       className="flex flex-row gap-4 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-muted hover:text-accent-foreground"
       href={item.url}
+      onClick={(e) => {
+        if (item.onClick) {
+          e.preventDefault();
+          item.onClick();
+        }
+      }}
     >
       <div className="text-foreground">{item.icon}</div>
       <div>

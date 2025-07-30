@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 
 export function GetProfile() {
   const [profile, setProfile] = useState<{ name: string } | null>(null);
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [, setAuthToken] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");

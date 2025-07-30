@@ -18,3 +18,13 @@ export const fetchProduct = async (offset: number, limit: number) => {
         throw error;
     }
 };
+
+export const fetchProductBySlug = async (slug: string) => {
+    try {
+        const response = await axiosInstance.get(`/products/slug/${slug}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching product by slug:", error);
+        throw error;
+    }
+}
