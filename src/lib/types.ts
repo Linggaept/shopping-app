@@ -1,0 +1,3 @@
+interface profile {
+    name :string;
+}
