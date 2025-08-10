@@ -39,7 +39,9 @@ export const useProduct = create<ProductState>((set) => ({
     try {
       set({ loading: true });
       const limit = 10;
-      const { products, totalCount } = await fetchProduct(page * limit, limit);
+      const result = await fetchProduct(page * limit, limit);
+      if (!result) return;
+      const { products, totalCount } = result;
       set({
         products,
         loading: false,

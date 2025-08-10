@@ -16,14 +16,15 @@ const DashboardAdmin = () => {
         </div>
       ) : (
         <>
-          <h1>Admin Dashboard</h1>
-          <p>
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <p className="text-gray-600 mb-4">
             Welcome to the admin dashboard. Here you can manage your application
             settings and user accounts.
           </p>
           <DashboardCard title="Total Products" description={`Total Products: ${productCount}`} />
         </>
       )}
+
     </Container>
   );
 };

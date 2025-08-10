@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { loginService } from "@/services/auth-service";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AlertModal from "@/components/alertModal";
 
 export function LoginFormAdmin({
   className,
@@ -21,7 +22,17 @@ export function LoginFormAdmin({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter()
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/admin/dashboard");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,18 +44,35 @@ export function LoginFormAdmin({
     console.log("Logging in with:", { email, password });
     try {
       const response = await loginService(email, password);
-      alert("Login successful!");
-
-      localStorage.setItem('token', response.access_token)
-      router.push('/admin/dashboard')
+      localStorage.setItem("token", response.access_token);
+      setShowSuccessAlert(true);
+      // Wait for modal to be closed before redirecting
+      setTimeout(() => {
+        router.push("/admin/dashboard");
+      }, 1500);
     } catch (error) {
       console.error("Error logging in:", error);
+      setErrorMessage("Invalid email or password");
+      setShowErrorAlert(true);
     }
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
+        <AlertModal
+          title="Login Successful"
+          description="You have successfully logged in. Redirecting to dashboard..."
+          isOpen={showSuccessAlert}
+          onClose={() => setShowSuccessAlert(false)}
+        />
+
+        <AlertModal
+          title="Login Failed"
+          description={errorMessage}
+          isOpen={showErrorAlert}
+          onClose={() => setShowErrorAlert(false)}
+        />
         <CardHeader>
           <CardTitle>Admin Login</CardTitle>
           <CardDescription>
@@ -85,7 +113,11 @@ export function LoginFormAdmin({
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" onClick={(e) => handleSubmit(e)} className="w-full">
+                <Button
+                  type="submit"
+                  onClick={(e) => handleSubmit(e)}
+                  className="w-full"
+                >
                   Login
                 </Button>
               </div>
@@ -99,7 +131,10 @@ export function LoginFormAdmin({
           </form>
         </CardContent>
       </Card>
-      <Link href="/" className="text-center underline underline-offset-4 text-sm">
+      <Link
+        href="/"
+        className="text-center underline underline-offset-4 text-sm"
+      >
         Back to home
       </Link>
     </div>

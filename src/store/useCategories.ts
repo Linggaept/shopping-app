@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { fetchCategory, fetchCategoriesById } from "@/services/category-service";
+import {
+  fetchCategory,
+  fetchCategoriesById,
+} from "@/services/category-service";
+import { fetchCategoriesBySlug } from "@/services/admin/categories-service";
 
 interface Product {
   id: number;
@@ -31,6 +35,7 @@ interface CategoryState {
   error: string | null;
   fetchCategories: () => Promise<void>;
   fetchCategoriesById: (id: number) => Promise<void>;
+  fetchCategoryBySlug: (slug: string) => Promise<void>;
 }
 
 export const useCategory = create<CategoryState>((set) => ({
@@ -44,12 +49,12 @@ export const useCategory = create<CategoryState>((set) => ({
       const response = await fetchCategory();
       set({
         categories: response,
-        loading: false
+        loading: false,
       });
     } catch (error) {
       set({
         error: "Failed to fetch categories",
-        loading: false
+        loading: false,
       });
     }
   },
@@ -57,16 +62,25 @@ export const useCategory = create<CategoryState>((set) => ({
     try {
       set({ loading: true, error: null });
       const categoryWithProducts = await fetchCategoriesById(id);
-      set({ 
+      set({
         selectedCategory: categoryWithProducts,
-        loading: false 
+        loading: false,
       });
     } catch (error) {
-      set({ 
+      set({
         error: "Failed to fetch category and products",
         loading: false,
-        selectedCategory: null
+        selectedCategory: null,
       });
+    }
+  },
+  fetchCategoryBySlug: async (slug: string) => {
+    set({ loading: true, error: null });
+    const categoryBySlug = await fetchCategoriesBySlug(slug);
+    if (categoryBySlug) {
+      set({ selectedCategory: categoryBySlug, loading: false });
+    } else {
+      set({ error: "Category not found", loading: false });
     }
   },
 }));

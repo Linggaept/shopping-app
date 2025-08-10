@@ -9,10 +9,12 @@ export const fetchProduct = async (offset: number, limit: number) => {
         // Get paginated data
         const response = await axiosInstance.get(`/products?offset=${offset}&limit=${limit}`);
         
-        return {
-            products: response.data,
-            totalCount
-        };
+        if (response.status === 200 || response.status === 201 || response.status === 304) {
+            return {
+                products: response.data,
+                totalCount
+            };
+        }
     } catch (error) {
         console.error("Error fetching products:", error);
         throw error;

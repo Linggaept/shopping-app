@@ -4,7 +4,7 @@ import ProductList from "./product-list";
 
 export default function Home() {
   return (
-    <Container>
+    <Container admin={false}>
       <Navbar1 />
       <ProductList />
     </Container>
